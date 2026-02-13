@@ -10,7 +10,9 @@ metadata:
     requires:
       env:
         - MEMBRANE_TOKEN
+        - MEMBRANE_API_URL
     primaryEnv: MEMBRANE_TOKEN
+    homepage: https://github.com/membranehq/agent-skills
 ---
 
 # Self-Integration
