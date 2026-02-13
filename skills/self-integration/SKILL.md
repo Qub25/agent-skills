@@ -5,14 +5,14 @@ license: MIT
 metadata:
   author: Membrane Inc
   version: "1.0.0"
-  homepage: https://github.com/membranehq/agent-skills
+  homepage: https://getmembrane.com
   openclaw:
     requires:
       env:
         - MEMBRANE_TOKEN
         - MEMBRANE_API_URL
     primaryEnv: MEMBRANE_TOKEN
-    homepage: https://github.com/membranehq/agent-skills
+    homepage: https://getmembrane.com
 ---
 
 # Self-Integration
