@@ -46,3 +46,14 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - MOCK_API_URL=http://mock-api:3000
       - MOCK_API_TOKEN=test-token
+
+  test-opencode:
+    build:
+      context: ..
+      dockerfile: agents/opencode/Dockerfile
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    environment:
+      - MOCK_API_URL=http://mock-api:3000
+      - MOCK_API_TOKEN=test-token
