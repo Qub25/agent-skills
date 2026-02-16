@@ -1,4 +1,4 @@
-import { type Plugin, tool } from "@opencode-ai/plugin"
+import { tool } from "@opencode-ai/plugin"
 import {
   type ToolDefinition,
   type MembraneConfig,
