@@ -22,8 +22,8 @@ assertContains(toolNames.join(", "), "run-tool", "Tools include run-tool")
   const { text } = await generateText({
     model: openai("gpt-4o-mini"),
     tools,
-    maxSteps: 1,
-    prompt: "What Membrane tools do you have? List all tool names.",
+    maxSteps: 3,
+    prompt: "What Membrane tools do you have? List all tool names. Do not call any tools, just list their names.",
   })
 
   assertContains(text, "list-connections", "LLM response mentions list-connections")
