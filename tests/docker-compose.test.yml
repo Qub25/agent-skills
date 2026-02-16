@@ -1,0 +1,59 @@
+services:
+  mock-api:
+    build:
+      context: ..
+      dockerfile: tests/mock-api/Dockerfile
+    environment:
+      - MOCK_API_TOKEN=test-token
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+
+  test-openai:
+    build:
+      context: ..
+      dockerfile: agents/openai/Dockerfile
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MOCK_API_URL=http://mock-api:3000
+      - MOCK_API_TOKEN=test-token
+
+  test-vercel-ai-sdk:
+    build:
+      context: ..
+      dockerfile: agents/vercel-ai-sdk/Dockerfile
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MOCK_API_URL=http://mock-api:3000
+      - MOCK_API_TOKEN=test-token
+
+  test-langchain:
+    build:
+      context: ..
+      dockerfile: agents/langchain/Dockerfile
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MOCK_API_URL=http://mock-api:3000
+      - MOCK_API_TOKEN=test-token
+
+  test-opencode:
+    build:
+      context: ..
+      dockerfile: agents/opencode/Dockerfile
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    environment:
+      - MOCK_API_URL=http://mock-api:3000
+      - MOCK_API_TOKEN=test-token

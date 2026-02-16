@@ -47,6 +47,19 @@ Optionally set a custom API URL (defaults to `https://api.getmembrane.com`):
 export MEMBRANE_API_URL="https://your-instance.example.com"
 ```
 
+## Custom Agent Tools
+
+If you're building a custom agent and need Membrane tools embedded directly in your code, see [`agents/`](agents). Each subdirectory contains a ready-to-run agent example with the framework adapter:
+
+| Agent | Framework |
+|---|---|
+| [openai](agents/openai/) | OpenAI SDK |
+| [vercel-ai-sdk](agents/vercel-ai-sdk/) | Vercel AI SDK |
+| [langchain](agents/langchain/) | LangChain |
+| [opencode](agents/opencode/) | OpenCode Plugin |
+
+Tool definitions live in [`tools/self-integration.ts`](tools/self-integration.ts).
+
 ## License
 
 MIT
