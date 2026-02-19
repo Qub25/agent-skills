@@ -4,7 +4,7 @@ description: Connect to any external app and perform actions on it. Use when the
 license: MIT
 metadata:
   author: Membrane Inc
-  version: "1.0.0"
+  version: '1.2.0'
   homepage: https://getmembrane.com
   openclaw:
     requires:
@@ -17,18 +17,37 @@ metadata:
 
 # Self-Integration
 
-Connect to any external app and perform actions on it. Uses the [Membrane](https://getmembrane.com) API.
+Connect to any external app and perform actions on it. Uses the [Membrane](https://getmembrane.com) CLI.
 
-## Making API Requests
+## Authentication
 
-All requests go to `${MEMBRANE_API_URL:-https://api.getmembrane.com}` with a Bearer token:
+Authenticate with the Membrane CLI:
 
+```bash
+npx @membranehq/cli login --tenant
 ```
-Authorization: Bearer $MEMBRANE_TOKEN
-Content-Type: application/json
+
+Alternatively, you can install the membfrane CLI globally (`npm i -g @membranehq/cli@latest`) and use `membrane login --tenant` instead.
+
+Always use `--tenant` to get a tenant-scoped token — this authenticates on behalf of a specific tenant (workspace + customer) in Membrane, so you don't need to pass `--workspaceKey` and `--tenantKey` on every subsequent command.
+
+This will either open a browser for authentication or print an authorization URL to the console, depending on whether interactive mode is available. The user authenticates in Membrane, then selects a workspace and tenant (user inside workspace).
+
+When login process is completed, the credentials are stored locally in `~/.membrane/credentials.json` and used in subsequent commands automatically.
+
+### Non-interactive Authentication
+
+If interactive browser login is not possible (e.g. remote/headless environment) the `membrane login` command will print an authorization URL to the terminal. The user can then open the URL in their browser and complete the login process.
+
+If this is your case, ask user to enter the code they see in the browser after completing the login process.
+
+When user enters the code, complete the login process with:
+
+```bash
+npx @membranehq/cli login complete <code>
 ```
 
-Get the API token from the [Membrane dashboard](https://console.getmembrane.com).
+All commands below use `npx @membranehq/cli` (or just `membrane` if installed globally). Add `--json` to any command for machine-readable JSON output to stdout. Command without `--json` flag will print the result in a human-readable (and often shorter) format.
 
 ## Workflow
 
@@ -38,9 +57,13 @@ A connection is an authenticated link to an external app (e.g. a user's Slack wo
 
 #### 1a. Check for existing connections
 
-`GET /connections`
+```bash
+npx @membranehq/cli connection list --json
+```
 
-Look for a connection matching the target app. Key fields: `id`, `name`, `connectorId`, `disconnected`.
+Look for a connection matching the target app. Key fields: `id`, `name`, `connectorId`, `disconnected`. 
+
+If no connection is found or a connection is disconnected (disconnected field is set to `true`), go to step 1b to find a connector. 
 
 If a matching connection exists and `disconnected` is `false`, skip to **Step 2**.
 
@@ -48,9 +71,11 @@ If a matching connection exists and `disconnected` is `false`, skip to **Step 2*
 
 A connector is a pre-built adapter for an external app. Search by app name:
 
-`GET /search?q=slack`
+```bash
+npx @membranehq/cli search slack --elementType connector --json
+```
 
-Look for results with `elementType: "connector"`. Use `element.id` as `connectorId` in step 1d.
+Look for results with `elementType: "Connector"`. Use `element.id` as `connectorId` in step 1d.
 
 If nothing is found, go to step 1c to build a connector.
 
@@ -58,27 +83,51 @@ If nothing is found, go to step 1c to build a connector.
 
 Create a Membrane Agent session to build a connector:
 
-`POST /agent/sessions` with body `{"prompt": "Build a connector for Slack (https://slack.com)"}`
+```bash
+npx @membranehq/cli agent-session create --agent connection-building --message "Build a connector for Slack (https://slack.com)" --json
+```
 
-Adjust the prompt to describe the actual app you need. Poll `GET /agent/sessions/{sessionId}?wait=true&timeout=30` until `state` is `"idle"` or `status` is `"completed"`.
+Adjust the message to describe the actual app you need. 
 
-You can send follow-up instructions via `POST /agent/sessions/{sessionId}/message` or abort via `POST /agent/sessions/{sessionId}/interrupt`.
+Poll until `state` is `"idle"` or `status` is `"completed"`:
 
-After the connector is built, search for it again (step 1b).
+```bash
+npx @membranehq/cli agent-session get <sessionId> --wait --json
+```
 
-#### 1d. Request a connection
+This command will wait until session is completed or up to a `--timeout` seconds and return the current state of the session.
+Keep polling until session is in `idle` state - which means the agent is done with your request. 
 
-Create a connection request so the user can authenticate with the external app:
+You can get the summary of what was done from the `summary` field.
 
-`POST /connection-requests` with body `{"connectorId": "cnt_abc123"}`
+You can send follow-up instructions or abort:
 
-The response includes a `url`. **Tell the user to open the `url`** to complete authentication (OAuth, API key, etc.).
+```bash
+npx @membranehq/cli agent-session send <sessionId> --message "Also add OAuth2 support" --json
+npx @membranehq/cli agent-session abort <sessionId> --json
+```
 
-#### 1e. Check connection result
+After the connector is built get its id from the session summary or search for it again (step 1b) if it's not in the summary.
 
-Poll until the user completes authentication:
+#### 1d. Create a connection
 
-`GET /connection-requests/{requestId}`
+Use the following command to create a connection:
+
+```bash
+npx @membranehq/cli connect --connectorId <connectorId>
+```
+
+In interactive mode, this will open the browser, wait for the user to complete authentication, and print the connection ID on success.
+
+If interactive mode is not available, this will create a connection request and output URL to the terminal. You need to ask user to follow this URL to complete the connection process.
+
+It will also output the connection request ID that you can then use to get the status of the connection request and the connection Id on success.
+
+Then poll until the user completes authentication:
+
+```bash
+npx @membranehq/cli connection-request get abc123 --json
+```
 
 - `status: "pending"` — user hasn't completed yet, poll again.
 - `status: "success"` — done. Use `resultConnectionId` as the connection ID going forward.
@@ -92,7 +141,11 @@ An action is an operation you can perform on a connected app (e.g. "Create task"
 
 Search using a natural language description of what you want to do:
 
-`GET /actions?connectionId=con_abc123&intent=send+a+message&limit=10`
+```bash
+npx @membranehq/cli action --connectionId abc123 --intent "send a message" --limit 10 --json
+```
+
+You should always search for actions in a conext of a specific connection.
 
 Each result includes `id`, `name`, `description`, `inputSchema` (what parameters the action accepts), and `outputSchema` (what it returns).
 
@@ -100,244 +153,112 @@ If no suitable action exists, go to step 2b.
 
 #### 2b. Build an action (if none exists)
 
-Use Membrane Agent. ALWAYS include the connection ID in the prompt:
+Use Membrane Agent. ALWAYS include the connection ID in the message:
 
-`POST /agent/sessions` with body `{"prompt": "Create a tool to send a message in a channel for connection con_abc123"}`
+```bash
+npx @membranehq/cli agent-session create --agent action-building --message "Create an action to send a message in a channel for connection abc123" --json
+```
 
-Adjust the prompt to describe the actual action you need. Poll for completion the same way as step 1c. After the action is built, search for it again (step 2a).
+Adjust the message to describe the actual action you need. Poll for completion the same way as step 1c. After the action is built, search for it again (step 2a).
 
 ### Step 3: Run an Action
 
 Execute the action using the action ID from step 2 and the connection ID from step 1:
 
-`POST /actions/{actionId}/run?connectionId=con_abc123` with body `{"input": {"channel": "#general", "text": "Hello!"}}`
+```bash
+npx @membranehq/cli action run <actionId> --connectionId abc123 --input '{"channel": "#general", "text": "Hello!"}' --json
+```
 
-Provide `input` matching the action's `inputSchema`.
+Provide `--input` matching the action's `inputSchema`.
 
 The result is in the `output` field of the response.
 
-## API Reference
+## CLI Reference
+
+All commands support `--json` for structured JSON output to stdout. Add `--workspaceKey <key>` and `--tenantKey <key>` to override project defaults.
+
+### connection
+
+```bash
+npx @membranehq/cli connection [--json]                    # List all connections
+npx @membranehq/cli connection get <id> [--json]           # Get a connection by ID
+```
+
+### connect (interactive)
+
+```bash
+npx @membranehq/cli connect --connectorId <id> [--json]           # Create connection via browser OAuth
+```
+
+Opens a browser for the user to authenticate, waits for completion, and prints the result. Use `--non-interactive` to print the URL instead of opening the browser.
+
+### connection-request
+
+```bash
+npx @membranehq/cli connection-request create [options] [--json]   # Create connection request
+npx @membranehq/cli connection-request get <requestId> [--json]    # Check request status
+```
+
+Options for `create`: `--connectorId <id>`, `--integrationId <id>`, `--integrationKey <key>`, `--connectionId <id>` (reconnect), `--name <name>`
+
+### action
+
+```bash
+npx @membranehq/cli action [--connectionId <id>] [--intent <text>] [--limit <n>] [--json]   # List/search actions
+npx @membranehq/cli action run <actionId> --connectionId <id> [--input <json>] [--json]      # Run an action
+```
+
+### search
+
+```bash
+npx @membranehq/cli search <query> [--elementType <type>] [--limit <n>] [--json]   # Search connectors, integrations, etc.
+```
+
+### agent-session
+
+```bash
+npx @membranehq/cli agent-session create --agent <agentName> --message <text> [--json]           # Create session
+npx @membranehq/cli agent-session get <id> [--wait] [--json]                 # Get status (--wait for long-poll)
+npx @membranehq/cli agent-session send <id> --message <text> [--json]        # Send follow-up message
+npx @membranehq/cli agent-session abort <id> [--json]                        # Abort session
+npx @membranehq/cli agent-session messages <id> [--json]                     # Get session messages
+```
+
+## Fallback: Raw API
+
+If the CLI is not available, you can make direct API requests.
 
 Base URL: `${MEMBRANE_API_URL:-https://api.getmembrane.com}`
 Auth header: `Authorization: Bearer $MEMBRANE_TOKEN`
 
-### GET /connections
+Get the API token from the [Membrane dashboard](https://console.getmembrane.com).
 
-List all connections.
-
-Response:
-
-```json
-{
-  "items": [
-    {
-      "id": "string",
-      "name": "string",
-      "connectorId": "string",
-      "integrationId": "string (optional)",
-      "disconnected": "boolean",
-      "state": "NOT_CONFIGURED | SETUP_IN_PROGRESS | SETUP_FAILED | READY",
-      "error": "object (optional)",
-      "createdAt": "datetime",
-      "updatedAt": "datetime"
-    }
-  ]
-}
-```
-
-### GET /search
-
-Search workspace elements by keyword.
-
-Query parameters:
-
-| Param | Type | Description |
-|---|---|---|
-| `q` | string (required) | Search query (1-200 chars) |
-| `elementType` | string (optional) | Filter by type: `Connector`, `Integration`, `Action`, etc. |
-| `limit` | number (optional) | Max results (1-100) |
-
-Response:
-
-```json
-{
-  "items": [
-    {
-      "elementType": "Connector",
-      "element": {
-        "id": "string",
-        "name": "string",
-        "logoUri": "string (optional)"
-      }
-    }
-  ]
-}
-```
-
-### POST /connection-requests
-
-Create a connection request for user authentication.
-
-Request body (at least one identifier required):
-
-| Field | Type | Description |
-|---|---|---|
-| `connectorId` | string | Connector ID |
-| `integrationId` | string | Integration ID (alternative) |
-| `integrationKey` | string | Integration key (alternative) |
-| `connectionId` | string | Existing connection ID (for reconnecting) |
-| `name` | string | Custom connection name |
-| `connectorVersion` | string | Connector version |
-| `connectorParameters` | object | Connector-specific parameters |
-
-Response:
-
-```json
-{
-  "requestId": "string",
-  "url": "string",
-  "status": "pending | success | cancelled | error",
-  "connectorId": "string (optional)",
-  "integrationId": "string (optional)",
-  "resultConnectionId": "string (optional, set on success)",
-  "resultError": "object (optional, set on error)",
-  "createdAt": "datetime"
-}
-```
-
-### GET /connection-requests/:requestId
-
-Check connection request status. Same response schema as POST.
-
-### GET /actions
-
-List or search actions.
-
-Query parameters:
-
-| Param | Type | Description |
-|---|---|---|
-| `connectionId` | string | Filter by connection |
-| `integrationId` | string | Filter by integration |
-| `intent` | string | Natural language search (max 200 chars) |
-| `limit` | number | Max results (default 10) |
-
-Response:
-
-```json
-{
-  "items": [
-    {
-      "id": "string",
-      "name": "string",
-      "key": "string",
-      "description": "string (optional)",
-      "type": "string",
-      "inputSchema": "JSON Schema (optional)",
-      "outputSchema": "JSON Schema (optional)",
-      "integrationId": "string (optional)",
-      "connectionId": "string (optional)"
-    }
-  ]
-}
-```
-
-### POST /actions/:actionId/run
-
-Run an action.
-
-Query parameters:
-
-| Param | Type | Description |
-|---|---|---|
-| `connectionId` | string | Connection to run the action on |
-
-Request body:
-
-| Field | Type | Description |
-|---|---|---|
-| `input` | any | Parameters matching the action's `inputSchema` |
-
-Response:
-
-```json
-{
-  "output": "any"
-}
-```
-
-### POST /agent/sessions
-
-Create an agent session to build connectors or actions.
-
-Request body:
-
-| Field | Type | Description |
-|---|---|---|
-| `prompt` | string (required) | Task description |
-
-Response:
-
-```json
-{
-  "id": "string",
-  "status": "queued | starting | running | completed | failed | cancelled",
-  "state": "busy | idle",
-  "prompt": "string",
-  "createdAt": "datetime",
-  "updatedAt": "datetime"
-}
-```
-
-### GET /agent/sessions/:id
-
-Get agent session status.
-
-Query parameters:
-
-| Param | Type | Description |
-|---|---|---|
-| `wait` | boolean | If true, long-poll until session is idle or timeout |
-| `timeout` | number | Max wait in seconds (1-60, default 30) |
-
-Response: same schema as POST /agent/sessions.
-
-### POST /agent/sessions/:id/message
-
-Send a follow-up message to an active agent session.
-
-Request body:
-
-| Field | Type | Description |
-|---|---|---|
-| `input` | string (required) | Message to send |
-
-Response: same schema as POST /agent/sessions.
-
-### POST /agent/sessions/:id/interrupt
-
-Abort an agent session.
-
-Response:
-
-```json
-{
-  "interrupted": "boolean"
-}
-```
+| CLI Command                                                  | API Equivalent                                                      |
+| ------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `connection --json`                                          | `GET /connections`                                                  |
+| `connection get <id> --json`                                 | `GET /connections/:id`                                              |
+| `search <q> --json`                                          | `GET /search?q=<q>`                                                 |
+| `connection-request create --connectorId <id> --json`        | `POST /connection-requests` with `{"connectorId": "<id>"}`          |
+| `connection-request get <id> --json`                         | `GET /connection-requests/:id`                                      |
+| `action --connectionId <id> --intent <text> --json`          | `GET /actions?connectionId=<id>&intent=<text>`                      |
+| `action run <id> --connectionId <cid> --input <json> --json` | `POST /actions/:id/run?connectionId=<cid>` with `{"input": <json>}` |
+| `agent-session create --message <text> --json`               | `POST /agent/sessions` with `{"prompt": "<text>"}`                  |
+| `agent-session get <id> --wait --json`                       | `GET /agent/sessions/:id?wait=true`                                 |
+| `agent-session send <id> --message <text> --json`            | `POST /agent/sessions/:id/message` with `{"input": "<text>"}`       |
+| `agent-session abort <id> --json`                            | `POST /agent/sessions/:id/interrupt`                                |
 
 ## External Endpoints
 
 All requests go to the Membrane API. No other external services are contacted directly by this skill.
 
-| Endpoint | Data Sent |
-|---|---|
-| `${MEMBRANE_API_URL:-https://api.getmembrane.com}/*` | API token, connection parameters, action inputs, agent prompts |
+| Endpoint                                             | Data Sent                                                             |
+| ---------------------------------------------------- | --------------------------------------------------------------------- |
+| `${MEMBRANE_API_URL:-https://api.getmembrane.com}/*` | Auth credentials, connection parameters, action inputs, agent prompts |
 
 ## Security & Privacy
 
 - All data is sent to the Membrane API over HTTPS.
-- `MEMBRANE_TOKEN` is a high-privilege credential that can create connections and run actions across external apps. Treat it as a secret.
+- CLI credentials are stored locally in `~/.membrane/` with restricted file permissions.
 - Connection authentication (OAuth, API keys) is handled by Membrane — credentials for external apps are stored by the Membrane service, not locally.
 - Action inputs and outputs pass through the Membrane API to the connected external app.
 
