@@ -60,7 +60,7 @@ A connection is an authenticated link to an external app (e.g. a user's Slack wo
 npx @membranehq/cli connection list --json
 ```
 
-Look for a connection matching the target app. Key fields: `id`, `name`, `connectorId`, `disconnected`. 
+Look for a connection matching the target app. Key fields: `id`, `name`, `connectorId`, `disconnected`.
 
 If no connection is found, go to step 1b to find a connector.
 
