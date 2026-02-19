@@ -10,7 +10,6 @@ metadata:
     requires:
       env:
         - MEMBRANE_TOKEN
-        - MEMBRANE_API_URL
     primaryEnv: MEMBRANE_TOKEN
     homepage: https://getmembrane.com
 ---
@@ -27,7 +26,7 @@ Authenticate with the Membrane CLI:
 npx @membranehq/cli login --tenant
 ```
 
-Alternatively, you can install the membfrane CLI globally (`npm i -g @membranehq/cli@latest`) and use `membrane login --tenant` instead.
+Alternatively, you can install the membrane CLI globally (`npm i -g @membranehq/cli@latest`) and use `membrane login --tenant` instead.
 
 Always use `--tenant` to get a tenant-scoped token — this authenticates on behalf of a specific tenant (workspace + customer) in Membrane, so you don't need to pass `--workspaceKey` and `--tenantKey` on every subsequent command.
 
@@ -39,7 +38,7 @@ When login process is completed, the credentials are stored locally in `~/.membr
 
 If interactive browser login is not possible (e.g. remote/headless environment) the `membrane login` command will print an authorization URL to the terminal. The user can then open the URL in their browser and complete the login process.
 
-If this is your case, ask user to enter the code they see in the browser after completing the login process.
+If this is the case, ask the user to enter the code they see in the browser after completing the login process.
 
 When user enters the code, complete the login process with:
 
@@ -63,7 +62,9 @@ npx @membranehq/cli connection list --json
 
 Look for a connection matching the target app. Key fields: `id`, `name`, `connectorId`, `disconnected`. 
 
-If no connection is found or a connection is disconnected (disconnected field is set to `true`), go to step 1b to find a connector. 
+If no connection is found, go to step 1b to find a connector.
+
+If a connection is disconnected (`disconnected` is `true`), you can reconnect it using `connect --connectionId <existingId>` (step 1d) instead of creating a new connection from scratch.
 
 If a matching connection exists and `disconnected` is `false`, skip to **Step 2**.
 
@@ -96,9 +97,12 @@ npx @membranehq/cli agent-session get <sessionId> --wait --json
 ```
 
 This command will wait until session is completed or up to a `--timeout` seconds and return the current state of the session.
-Keep polling until session is in `idle` state - which means the agent is done with your request. 
+Keep polling until session is in `idle` state - which means the agent is done with your request.
 
-You can get the summary of what was done from the `summary` field.
+Key response fields:
+- `state`: `busy` (still working) or `idle` (done with current request)
+- `status`: `queued`, `starting`, `running`, `completed`, `failed`, or `cancelled`
+- `summary`: description of what was done (available when idle)
 
 You can send follow-up instructions or abort:
 
@@ -119,7 +123,7 @@ npx @membranehq/cli connect --connectorId <connectorId>
 
 In interactive mode, this will open the browser, wait for the user to complete authentication, and print the connection ID on success.
 
-If interactive mode is not available, this will create a connection request and output URL to the terminal. You need to ask user to follow this URL to complete the connection process.
+If interactive mode is not available, add `--non-interactive` to print the URL instead of opening the browser. This will create a connection request and output a URL to the terminal. You need to ask the user to follow this URL to complete the connection process.
 
 It will also output the connection request ID that you can then use to get the status of the connection request and the connection Id on success.
 
@@ -132,6 +136,7 @@ npx @membranehq/cli connection-request get abc123 --json
 - `status: "pending"` — user hasn't completed yet, poll again.
 - `status: "success"` — done. Use `resultConnectionId` as the connection ID going forward.
 - `status: "error"` — failed. Check `resultError` for details.
+- `status: "cancelled"` — user cancelled the connection flow.
 
 ### Step 2: Get an Action
 
@@ -142,10 +147,10 @@ An action is an operation you can perform on a connected app (e.g. "Create task"
 Search using a natural language description of what you want to do:
 
 ```bash
-npx @membranehq/cli action --connectionId abc123 --intent "send a message" --limit 10 --json
+npx @membranehq/cli action list --connectionId abc123 --intent "send a message" --limit 10 --json
 ```
 
-You should always search for actions in a conext of a specific connection.
+You should always search for actions in the context of a specific connection.
 
 Each result includes `id`, `name`, `description`, `inputSchema` (what parameters the action accepts), and `outputSchema` (what it returns).
 
@@ -180,14 +185,14 @@ All commands support `--json` for structured JSON output to stdout. Add `--works
 ### connection
 
 ```bash
-npx @membranehq/cli connection [--json]                    # List all connections
+npx @membranehq/cli connection list [--json]                # List all connections
 npx @membranehq/cli connection get <id> [--json]           # Get a connection by ID
 ```
 
 ### connect (interactive)
 
 ```bash
-npx @membranehq/cli connect --connectorId <id> [--json]           # Create connection via browser OAuth
+npx @membranehq/cli connect --connectorId <id>                    # Create connection via browser OAuth
 ```
 
 Opens a browser for the user to authenticate, waits for completion, and prints the result. Use `--non-interactive` to print the URL instead of opening the browser.
@@ -204,7 +209,7 @@ Options for `create`: `--connectorId <id>`, `--integrationId <id>`, `--integrati
 ### action
 
 ```bash
-npx @membranehq/cli action [--connectionId <id>] [--intent <text>] [--limit <n>] [--json]   # List/search actions
+npx @membranehq/cli action list [--connectionId <id>] [--intent <text>] [--limit <n>] [--json]   # List/search actions
 npx @membranehq/cli action run <actionId> --connectionId <id> [--input <json>] [--json]      # Run an action
 ```
 
@@ -218,6 +223,7 @@ npx @membranehq/cli search <query> [--elementType <type>] [--limit <n>] [--json]
 
 ```bash
 npx @membranehq/cli agent-session create --agent <agentName> --message <text> [--json]           # Create session
+npx @membranehq/cli agent-session list [--json]                              # List sessions
 npx @membranehq/cli agent-session get <id> [--wait] [--json]                 # Get status (--wait for long-poll)
 npx @membranehq/cli agent-session send <id> --message <text> [--json]        # Send follow-up message
 npx @membranehq/cli agent-session abort <id> [--json]                        # Abort session
@@ -228,19 +234,19 @@ npx @membranehq/cli agent-session messages <id> [--json]                     # G
 
 If the CLI is not available, you can make direct API requests.
 
-Base URL: `${MEMBRANE_API_URL:-https://api.getmembrane.com}`
+Base URL: `https://api.getmembrane.com`
 Auth header: `Authorization: Bearer $MEMBRANE_TOKEN`
 
 Get the API token from the [Membrane dashboard](https://console.getmembrane.com).
 
 | CLI Command                                                  | API Equivalent                                                      |
 | ------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `connection --json`                                          | `GET /connections`                                                  |
+| `connection list --json`                                     | `GET /connections`                                                  |
 | `connection get <id> --json`                                 | `GET /connections/:id`                                              |
 | `search <q> --json`                                          | `GET /search?q=<q>`                                                 |
 | `connection-request create --connectorId <id> --json`        | `POST /connection-requests` with `{"connectorId": "<id>"}`          |
 | `connection-request get <id> --json`                         | `GET /connection-requests/:id`                                      |
-| `action --connectionId <id> --intent <text> --json`          | `GET /actions?connectionId=<id>&intent=<text>`                      |
+| `action list --connectionId <id> --intent <text> --json`     | `GET /actions?connectionId=<id>&intent=<text>`                      |
 | `action run <id> --connectionId <cid> --input <json> --json` | `POST /actions/:id/run?connectionId=<cid>` with `{"input": <json>}` |
 | `agent-session create --message <text> --json`               | `POST /agent/sessions` with `{"prompt": "<text>"}`                  |
 | `agent-session get <id> --wait --json`                       | `GET /agent/sessions/:id?wait=true`                                 |
@@ -253,7 +259,7 @@ All requests go to the Membrane API. No other external services are contacted di
 
 | Endpoint                                             | Data Sent                                                             |
 | ---------------------------------------------------- | --------------------------------------------------------------------- |
-| `${MEMBRANE_API_URL:-https://api.getmembrane.com}/*` | Auth credentials, connection parameters, action inputs, agent prompts |
+| `https://api.getmembrane.com/*` | Auth credentials, connection parameters, action inputs, agent prompts |
 
 ## Security & Privacy
 
