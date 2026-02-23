@@ -1,17 +1,11 @@
 ---
-name: self-integration
+name: integrate-any-external-app
 description: Connect to any external app and perform actions on it. Use when the user wants to interact with external services like Slack, Linear, HubSpot, Salesforce, Jira, GitHub, Google Sheets, or any other app — send messages, create tasks, sync data, manage contacts, or perform any API operation.
 license: MIT
 metadata:
   author: Membrane Inc
   version: '1.2.0'
   homepage: https://getmembrane.com
-  openclaw:
-    requires:
-      env:
-        - MEMBRANE_TOKEN
-    primaryEnv: MEMBRANE_TOKEN
-    homepage: https://getmembrane.com
 ---
 
 # Self-Integration

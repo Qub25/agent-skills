@@ -15,20 +15,21 @@ npx skills add membranehq/agent-skills
 Install a specific skill:
 
 ```bash
-npx skills add membranehq/agent-skills --skill self-integration
+npx skills add membranehq/agent-skills --skill integrate-any-external-app
 ```
 
 Or using the shorthand:
 
 ```bash
-npx skills add membranehq/agent-skills@self-integration
+npx skills add membranehq/agent-skills@integrate-any-external-app
 ```
 
 ## Available Skills
 
 | Skill | Description |
 |---|---|
-| [self-integration](skills/self-integration/) | Connects agent to any external app on behalf of the user and lets it take any actions inside those apps |
+| [integrate-any-external-app](skills/integrate-any-external-app/) | Connects agent to any external app on behalf of the user and lets it take any actions inside those apps |
+| [build-integrated-apps](skills/build-integrated-apps/) | Build apps that integrate with external services — connection UI, running actions, data sync, AI agent tools |
 
 ## Setup
 
