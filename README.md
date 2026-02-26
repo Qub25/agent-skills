@@ -5,14 +5,63 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-compatible-green.svg)](https://agentskills.io/)
 
-Reusable skills that let [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Cursor](https://cursor.sh), [GitHub Copilot](https://github.com/features/copilot), [Gemini CLI](https://github.com/google-gemini/gemini-cli), and other AI agents connect to Slack, HubSpot, Salesforce, and 1000+ apps through [Membrane](https://getmembrane.com).
+Reusable skills that let AI coding agents connect to Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 1000+ apps through [Membrane](https://getmembrane.com). Built on the open [Agent Skills](https://agentskills.io/) specification.
+
+## Why Membrane Agent Skills?
+
+- **Any app, any action** — Connect to 1000+ APIs out of the box. If a connector doesn't exist, Membrane's AI agent builds one for you on the fly.
+- **Works with your agent** — Drop-in support for Claude Code, Cursor, GitHub Copilot, Gemini CLI, OpenClaw, and any agent that supports the Agent Skills spec.
+- **Two skills, two use cases** — Use `connect-any-api` to let your agent talk to apps directly. Use `build-integrations` when you're building a product that needs integration features.
+- **Auth handled for you** — OAuth flows, API keys, token refresh — Membrane manages credentials so your agent doesn't have to.
+
+## How It Works
+
+Your agent learns a simple 3-step workflow:
+
+```
+1. Connect    →  Authenticate with any external app (Slack, HubSpot, Jira, etc.)
+2. Find       →  Search for the right action by describing what you want in natural language
+3. Act        →  Execute the action with typed inputs and get structured output
+```
+
+No API docs to read. No SDKs to install. Just tell your agent what you want and it figures out the rest.
 
 ## Available Skills
 
-| Skill | Description |
+### `connect-any-api`
+
+**For users and agents.** Install this skill and your AI agent can connect to any external app and take actions on your behalf — send Slack messages, create Jira tickets, update HubSpot contacts, push to GitHub, and more.
+
+```bash
+npx skills add membranehq/agent-skills@connect-any-api
+```
+
+**Example:** You tell your agent *"send a message to #general on Slack saying the deploy is done"* — the agent authenticates with Slack (if not already connected), finds the right action, and sends the message. No code written, no API wrangling.
+
+---
+
+### `build-integrations`
+
+**For developers building products.** This skill teaches your coding agent how to add integration features to your app — connection UI for your users, OAuth flows, running actions on their behalf, syncing data, handling webhooks, and exposing integrations as AI agent tools.
+
+```bash
+npx skills add membranehq/agent-skills@build-integrations
+```
+
+**Covers:** JavaScript SDK, React SDK, REST API, frontend connection UI, backend token generation, data collections, flows, and MCP server setup.
+
+---
+
+## Compatible Agents
+
+| Agent | Status |
 |---|---|
-| [connect-any-api](skills/connect-any-api/) | Connect to any external API and perform actions — Slack, HubSpot, Salesforce, GitHub, Jira, and 1000+ more |
-| [build-integrations](skills/build-integrations/) | Add integrations to your product — connection UI, OAuth, actions, data sync, webhooks, and AI agent tools |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Fully supported |
+| [Cursor](https://cursor.sh) | Fully supported |
+| [GitHub Copilot](https://github.com/features/copilot) | Fully supported |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Fully supported |
+| [OpenClaw](https://github.com/nicepkg/openclaw) | Fully supported |
+| Any [Agent Skills](https://agentskills.io/) compatible agent | Fully supported |
 
 ## Quick Start
 
@@ -28,12 +77,6 @@ Install a specific skill:
 npx skills add membranehq/agent-skills --skill connect-any-api
 ```
 
-Or using the shorthand:
-
-```bash
-npx skills add membranehq/agent-skills@connect-any-api
-```
-
 ## Setup
 
 All skills require a Membrane account:
@@ -45,24 +88,24 @@ All skills require a Membrane account:
    export MEMBRANE_TOKEN="your-token-here"
    ```
 
-Optionally set a custom API URL (defaults to `https://api.getmembrane.com`):
-
-```bash
-export MEMBRANE_API_URL="https://your-instance.example.com"
-```
-
 ## Custom Agent Tools
 
-If you're building a custom agent and need Membrane tools embedded directly in your code, see [`agents/`](agents). Each subdirectory contains a ready-to-run agent example:
+Building a custom agent? You can embed Membrane tools directly in your code instead of using skills. See [`agents/`](agents) for ready-to-run examples:
 
-| Agent | Framework |
+| Framework | Example |
 |---|---|
-| [openai](agents/openai/) | OpenAI SDK |
-| [vercel-ai-sdk](agents/vercel-ai-sdk/) | Vercel AI SDK |
-| [langchain](agents/langchain/) | LangChain |
-| [opencode](agents/opencode/) | OpenCode Plugin |
+| [OpenAI SDK](agents/openai/) | Function calling with Membrane tools |
+| [Vercel AI SDK](agents/vercel-ai-sdk/) | Streaming agent with tool use |
+| [LangChain](agents/langchain/) | LangChain agent with Membrane tools |
+| [OpenCode](agents/opencode/) | OpenCode plugin integration |
 
-Tool definitions live in [`tools/self-integration.ts`](tools/self-integration.ts).
+Tool definitions: [`tools/self-integration.ts`](tools/self-integration.ts)
+
+## Resources
+
+- [Membrane Console](https://console.getmembrane.com) — Dashboard for managing workspaces, connections, and API tokens
+- [Membrane Docs](https://getmembrane.com) — Full documentation
+- [Agent Skills Spec](https://agentskills.io/) — The open specification these skills are built on
 
 ## License
 
