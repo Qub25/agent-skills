@@ -19,9 +19,9 @@
 
 Reusable skills that let AI coding agents connect to Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 1000+ apps through [Membrane](https://getmembrane.com). Built on the open [Agent Skills](https://agentskills.io/) specification.
 
-## Why Membrane Agent Skills?
+## What are Integration Skills?
 
-- **Any app, any action** — Connect to 1000+ APIs out of the box. If a connector doesn't exist, Membrane's AI agent builds one for you on the fly.
+- **Any app, any action** — Connect to any API on the fly. If a connector doesn't exist, Membrane's AI agent builds one for you automatically.
 - **Works with your agent** — Drop-in support for Claude Code, Cursor, GitHub Copilot, Gemini CLI, and any agent that supports the Agent Skills spec.
 - **Two skills, two use cases** — Use `connect-any-api` to let your agent talk to apps directly. Use `build-integrations` when you're building a product that needs integration features.
 - **Auth handled for you** — OAuth flows, API keys, token refresh — Membrane manages credentials so your agent doesn't have to.
