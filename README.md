@@ -9,7 +9,7 @@
 
   <h1>Integration Skills by Membrane</h1>
 
-  <p><strong>Give your AI coding agent the power to connect to any API and take action.</strong></p>
+  <p><strong>Give your AI agent the power to connect to any API and take action.</strong></p>
 
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <a href="https://agentskills.io/"><img src="https://img.shields.io/badge/Agent_Skills-compatible-green.svg" alt="Agent Skills"></a>
@@ -17,7 +17,7 @@
 
 <br>
 
-Reusable skills that let AI coding agents connect to Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 1000+ apps through [Membrane](https://getmembrane.com). Built on the open [Agent Skills](https://agentskills.io/) specification.
+Reusable skills that let AI agents connect to Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 1000+ apps through [Membrane](https://getmembrane.com). Built on the open [Agent Skills](https://agentskills.io/) specification.
 
 ## What are Integration Skills?
 
@@ -74,7 +74,7 @@ Done — ticket created and assigned.
 
 ### `build-integrations`
 
-**For developers building products.** This skill teaches your coding agent how to add integration features to your app — connection UI for your users, OAuth flows, running actions on their behalf, syncing data, handling webhooks, and exposing integrations as AI agent tools.
+**For developers building products.** This skill teaches your agent how to add integration features to your app — connection UI for your users, OAuth flows, running actions on their behalf, syncing data, handling webhooks, and exposing integrations as AI agent tools.
 
 ```bash
 npx skills add membranehq/agent-skills@build-integrations
