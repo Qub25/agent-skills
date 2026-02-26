@@ -1,16 +1,28 @@
-# Membrane Agent Skills
+<div align="center">
+  <a href="https://getmembrane.com">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/images/logo-light.png">
+      <source media="(prefers-color-scheme: light)" srcset=".github/images/logo-dark.png">
+      <img alt="Membrane" src=".github/images/logo-dark.png" width="300">
+    </picture>
+  </a>
 
-**Give your AI coding agent the power to connect to any API and take action.**
+  <h1>Integration Skills by Membrane</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Agent Skills](https://img.shields.io/badge/Agent_Skills-compatible-green.svg)](https://agentskills.io/)
+  <p><strong>Give your AI coding agent the power to connect to any API and take action.</strong></p>
+
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://agentskills.io/"><img src="https://img.shields.io/badge/Agent_Skills-compatible-green.svg" alt="Agent Skills"></a>
+</div>
+
+<br>
 
 Reusable skills that let AI coding agents connect to Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 1000+ apps through [Membrane](https://getmembrane.com). Built on the open [Agent Skills](https://agentskills.io/) specification.
 
 ## Why Membrane Agent Skills?
 
 - **Any app, any action** — Connect to 1000+ APIs out of the box. If a connector doesn't exist, Membrane's AI agent builds one for you on the fly.
-- **Works with your agent** — Drop-in support for Claude Code, Cursor, GitHub Copilot, Gemini CLI, OpenClaw, and any agent that supports the Agent Skills spec.
+- **Works with your agent** — Drop-in support for Claude Code, Cursor, GitHub Copilot, Gemini CLI, and any agent that supports the Agent Skills spec.
 - **Two skills, two use cases** — Use `connect-any-api` to let your agent talk to apps directly. Use `build-integrations` when you're building a product that needs integration features.
 - **Auth handled for you** — OAuth flows, API keys, token refresh — Membrane manages credentials so your agent doesn't have to.
 
@@ -36,7 +48,27 @@ No API docs to read. No SDKs to install. Just tell your agent what you want and 
 npx skills add membranehq/agent-skills@connect-any-api
 ```
 
-**Example:** You tell your agent *"send a message to #general on Slack saying the deploy is done"* — the agent authenticates with Slack (if not already connected), finds the right action, and sends the message. No code written, no API wrangling.
+**Example — what this looks like in practice:**
+
+```
+You:    "Send a message to #general on Slack saying the deploy is done"
+
+Agent:  1. Checks for an existing Slack connection (or authenticates you)
+        2. Finds the "Send Message" action via natural language search
+        3. Runs the action with channel=#general, message="The deploy is done"
+
+Done — message sent. No code written, no API docs, no tokens to manage.
+```
+
+```
+You:    "Create a Jira ticket for the login bug, assign it to me, priority high"
+
+Agent:  1. Connects to Jira (if not already connected)
+        2. Finds the "Create Issue" action
+        3. Runs it with project, summary, assignee, and priority fields
+
+Done — ticket created and assigned.
+```
 
 ---
 
@@ -48,6 +80,31 @@ npx skills add membranehq/agent-skills@connect-any-api
 npx skills add membranehq/agent-skills@build-integrations
 ```
 
+**Example — what this looks like in practice:**
+
+```
+You:    "Add a Slack integration to our app so users can connect their workspace
+         and we can send notifications on their behalf"
+
+Agent:  1. Sets up backend token generation for your users
+        2. Adds the Membrane React SDK with connection UI components
+        3. Wires up the OAuth flow so users can connect their Slack
+        4. Creates a sendNotification() function that runs the Send Message action
+        5. Handles token refresh and error states
+
+Done — your users can now connect Slack and receive notifications.
+```
+
+```
+You:    "Add an MCP server to our product so AI agents can use our integrations"
+
+Agent:  1. Configures the Membrane MCP server endpoint
+        2. Sets up dynamic tool discovery from your available actions
+        3. Wires authentication so each user gets their own tool set
+
+Done — any MCP-compatible agent can now use your product's integrations.
+```
+
 **Covers:** JavaScript SDK, React SDK, REST API, frontend connection UI, backend token generation, data collections, flows, and MCP server setup.
 
 ---
@@ -56,12 +113,18 @@ npx skills add membranehq/agent-skills@build-integrations
 
 | Agent | Status |
 |---|---|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Fully supported |
-| [Cursor](https://cursor.sh) | Fully supported |
-| [GitHub Copilot](https://github.com/features/copilot) | Fully supported |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Fully supported |
-| [OpenClaw](https://github.com/nicepkg/openclaw) | Fully supported |
-| Any [Agent Skills](https://agentskills.io/) compatible agent | Fully supported |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Supported |
+| [Cursor](https://cursor.sh) | Supported |
+| [GitHub Copilot](https://github.com/features/copilot) | Supported |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Supported |
+| [OpenClaw](https://github.com/nicepkg/openclaw) | Supported |
+| [Cline](https://github.com/cline/cline) | Coming soon |
+| [Aider](https://github.com/paul-gauthier/aider) | Coming soon |
+| [Continue](https://github.com/continuedev/continue) | Coming soon |
+| [LangChain](https://github.com/langchain-ai/langchain) | Coming soon |
+| [CrewAI](https://github.com/crewAIInc/crewAI) | Coming soon |
+| [AutoGen](https://github.com/microsoft/autogen) | Coming soon |
+| Any [Agent Skills](https://agentskills.io/) compatible agent | Supported |
 
 ## Quick Start
 
