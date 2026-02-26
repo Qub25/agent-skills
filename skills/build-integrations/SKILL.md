@@ -1,6 +1,6 @@
 ---
 name: build-integrations
-description: Add integrations to your product — let users connect to Slack, HubSpot, Salesforce, GitHub, Jira, and 1000+ APIs. Connection UI, OAuth, actions, data sync, webhooks, and AI agent tools via Membrane.
+description: Add integrations to your product — let users connect to Slack, HubSpot, Salesforce, GitHub, Jira, and 100,000+ APIs. Connection UI, OAuth, actions, data sync, webhooks, and AI agent tools via Membrane.
 license: MIT
 metadata:
   author: Membrane Inc

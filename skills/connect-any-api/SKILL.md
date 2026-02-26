@@ -1,6 +1,6 @@
 ---
 name: connect-any-api
-description: Connect to any external API and perform actions — Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 1000+ more. Send messages, create tasks, sync data, manage contacts, or run any API operation.
+description: Connect to any external API and perform actions — Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 100,000+ more. Send messages, create tasks, sync data, manage contacts, or run any API operation.
 license: MIT
 metadata:
   author: Membrane Inc

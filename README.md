@@ -17,7 +17,7 @@
 
 <br>
 
-Reusable skills that let AI agents connect to Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 1000+ apps through [Membrane](https://getmembrane.com). Built on the open [Agent Skills](https://agentskills.io/) specification.
+Reusable skills that let AI agents connect to Slack, HubSpot, Salesforce, GitHub, Jira, Google Sheets, and 100,000+ apps through [Membrane](https://getmembrane.com). Built on the open [Agent Skills](https://agentskills.io/) specification.
 
 ## What are Integration Skills?
 
